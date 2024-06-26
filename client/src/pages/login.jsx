@@ -1,14 +1,35 @@
 import React from 'react'
-import {Form, Input } from 'antd';
+import {Form, Input,message } from 'antd';
 import '../styles/RegisterStyles.css'
-import  {Link} from 'react-router-dom'
+import  {Link,useNavigate} from 'react-router-dom'
+import {useDispatch} from 'react-redux' 
+import {showLoading,hideLoading} from  '../redux/features/alertSlice'
+import axios from 'axios'
 const Login = () => {
-  const onfinishHandler=(values)=>
+  const navigate=useNavigate();
+  const dispatch=useDispatch();
+  const onfinishHandler=async(values)=>
     {
-      console.log(values)
+     try {
+        dispatch(showLoading())
+        const res=await axios.post('/api/v1/user/login',values)
+        dispatch(hideLoading())
+        if(res.data.success)
+          {
+            localStorage.setItem("token",res.data.token)
+            message.success('Login successfully')
+            navigate('/')
+          }
+          else{
+            message.error(res.data.message)
+          }
+     } catch (error) {
+       dispatch(hideLoading())
+       console.log(error)
+       message.error('something went wrong')
+     }
     }
   return (
-  
     <>
     <div className="from-container">
         <Form layout='vertical' onFinish={onfinishHandler} className='register-form card'>
